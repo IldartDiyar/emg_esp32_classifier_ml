@@ -9,3 +9,9 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
+    networks:
+      - emg-net
+
+networks:
+  emg-net:
+    external: true
