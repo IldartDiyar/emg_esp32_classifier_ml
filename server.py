@@ -2,14 +2,46 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
 import joblib
+import tensorflow as tf
 from tensorflow import keras
 
 MODEL_PATH = "emg_ann.keras"
 SCALER_PATH = "scaler.joblib"
 
-print("Loading model...")
-model = keras.models.load_model(MODEL_PATH)
-print("Model loaded OK")
+print("Loading model (safe mode)...")
+
+try:
+    # Try normal load first
+    model = keras.models.load_model(MODEL_PATH)
+    print("Model loaded normally.")
+except Exception as e:
+    print("Normal load failed:", e)
+    print("Attempting safe rebuild...")
+
+    # Load model without compiling, allowing legacy configs
+    loaded = keras.models.load_model(
+        MODEL_PATH,
+        compile=False,
+        safe_mode=False  # Disable keras3 strict mode
+    )
+
+    # Rebuild a NEW Sequential model for TF 2.x compatibility
+    new_model = keras.Sequential()
+
+    for layer in loaded.layers:
+        if isinstance(layer, keras.layers.InputLayer):
+            # Rebuild the InputLayer without batch_shape
+            new_model.add(
+                keras.layers.Input(shape=layer.input_shape[1:])
+            )
+        else:
+            new_model.add(layer)
+
+    # Explicitly build for compatibility
+    new_model.build(input_shape=(None, loaded.input_shape[1]))
+
+    model = new_model
+    print("Model rebuilt successfully for TF2.x.")
 
 print("Loading scaler...")
 scaler = joblib.load(SCALER_PATH)
