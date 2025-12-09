@@ -5,7 +5,7 @@ import joblib
 import tensorflow as tf
 from tensorflow import keras
 
-MODEL_PATH = "emg_ann.keras"
+MODEL_PATH = "emg_ann_compat.h5"
 SCALER_PATH = "scaler.joblib"
 
 print("Loading model (safe mode)...")
