@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY server.py .
-COPY emg_ann.keras .
+COPY emg_ann_compat.h5 .
 COPY scaler.joblib .
 COPY requirements.txt .
 
