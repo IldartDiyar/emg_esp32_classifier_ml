@@ -4,3 +4,4 @@ numpy
 joblib
 tensorflow-cpu==2.15.0
 pydantic
+scikit-learn
